@@ -1,0 +1,124 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+    <changeSet author="Roberto D. Cazarin" id="petDetail_20220317_0000">
+        <createTable tableName="pet_detail" schemaName="${schemaApp}">
+
+            <column autoIncrement="true" name="pet_detail_id" type="BIGINT">
+                <constraints primaryKey="true"/>
+            </column>
+
+            <column name="weight" type="VARCHAR(40)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="height" type="varchar(100)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="birthday" type="DATE"/>
+
+            <column name="primary_color" type="varchar(20)"/>
+
+            <column name="secundary_color2" type="varchar(20)">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="details" type="TEXT">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="status" type="varchar(100)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="pet_id" type="bigint">
+                <constraints unique="true" uniqueConstraintName="pet_detail_uq" nullable="false"/>
+            </column>
+
+            <column name="active" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="create_at" type="DATETIME" defaultValueComputed="current_timestamp">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="update_at" type="DATETIME" defaultValueComputed="current_timestamp">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="version" type="BIGINT" defaultValueNumeric="1">
+                <constraints nullable="false"/>
+            </column>
+
+        </createTable>
+    </changeSet>
+
+    <changeSet author="Roberto D. Cazarin" id="petDetail_20220317_0001">
+        <addForeignKeyConstraint baseTableSchemaName="${schemaApp}"
+                                 baseTableName="pet_detail"
+                                 baseColumnNames="pet_id"
+                                 constraintName="detail_fk"
+                                 referencedTableSchemaName="${schemaApp}"
+                                 referencedTableName="pets"
+                                 referencedColumnNames="pet_id"/>
+    </changeSet>
+
+
+    <changeSet author="Roberto D. Cazarin" id="petDetail_20220317_0002">
+        <modifyDataType schemaName="${schemaApp}" tableName="pet_detail" columnName="height" newDataType="double"/>
+        <modifyDataType schemaName="${schemaApp}" tableName="pet_detail" columnName="weight" newDataType="double"/>
+    </changeSet>
+
+    <changeSet author="Roberto D. Cazarin" id="petDetail_20220318_0001">
+        <addNotNullConstraint schemaName="${schemaApp}" tableName="pet_detail" columnName="weight"/>
+        <addNotNullConstraint schemaName="${schemaApp}" tableName="pet_detail" columnName="height"/>
+        <addNotNullConstraint schemaName="${schemaApp}" tableName="pet_detail" columnName="birthday"/>
+        <addNotNullConstraint schemaName="${schemaApp}" tableName="pet_detail" columnName="primary_color"/>
+
+        <dropNotNullConstraint schemaName="${schemaApp}" tableName="pet_detail" columnName="secundary_color2"/>
+        <dropNotNullConstraint schemaName="${schemaApp}" tableName="pet_detail" columnName="details"/>
+
+        <dropColumn tableName="pet_detail" schemaName="${schemaApp}" columnName="status"/>
+        <addColumn tableName="pet_detail" schemaName="${schemaApp}">
+            <column type="PetStatus" name="status" defaultValueComputed="'OK'::PetStatus">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+
+    <changeSet author="Roberto D. Cazarin" id="petDetail_20220325_0001">
+        <dropColumn tableName="pet_detail" schemaName="${schemaApp}" columnName="status"/>
+        <dropColumn tableName="pet_detail" schemaName="${schemaApp}" columnName="birthday"/>
+        <dropColumn tableName="pet_detail" schemaName="${schemaApp}" columnName="primary_color"/>
+        <dropColumn tableName="pet_detail" schemaName="${schemaApp}" columnName="secundary_color2"/>
+
+        <dropUniqueConstraint tableName="pet_detail" schemaName="${schemaApp}" constraintName="pet_detail_uq"/>
+    </changeSet>
+
+    <changeSet author="Roberto D. Cazarin" id="petDetail_20220325_0002">
+        <addColumn tableName="pet_detail" schemaName="${schemaApp}">
+            <column type="character varying(36)" name="create_by">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="Roberto D. Cazarin" id="petDetail_20220325_0003">
+        <addForeignKeyConstraint baseTableSchemaName="${schemaApp}"
+                                 baseTableName="pet_detail"
+                                 baseColumnNames="create_by"
+                                 constraintName="create_by_petdetail_fk"
+                                 referencedTableSchemaName="keycloak"
+                                 referencedTableName="user_entity"
+                                 referencedColumnNames="id"
+        />
+        <createIndex tableName="pet_detail" indexName="create_by_petdetail_indx" schemaName="${schemaApp}">
+            <column name="create_by"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>

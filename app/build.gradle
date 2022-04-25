@@ -1,0 +1,51 @@
+plugins {
+    id 'org.springframework.boot'
+    id 'io.spring.dependency-management'
+    id 'java'
+}
+
+dependencies {
+    implementation platform("org.keycloak.bom:keycloak-adapter-bom:$keycloakVersion")
+
+    compileOnly "org.projectlombok:lombok:$lombokVersion"
+    runtimeOnly 'org.postgresql:postgresql'
+
+    annotationProcessor "org.mapstruct:mapstruct-processor:$mapstructVerion"
+    annotationProcessor "org.projectlombok:lombok:$lombokVersion"
+    annotationProcessor "org.projectlombok:lombok-mapstruct-binding:0.2.0"
+
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.keycloak:keycloak-spring-boot-starter'
+    implementation "org.zalando:problem-spring-web-starter:$problemZalandoVersion"
+    implementation "com.google.guava:guava:$guavaVersion"
+    implementation "org.mapstruct:mapstruct:$mapstructVerion"
+    implementation "com.vladmihalcea:hibernate-types-55:$vladVersion"
+    implementation "org.jetbrains:annotations:$jetbrainsVersion"
+    implementation "com.konghq:unirest-java:$unirestVerion"
+    implementation "com.konghq:unirest-objectmapper-jackson:$unirestVerion"
+
+    testCompileOnly "org.projectlombok:lombok:$lombokVersion"
+
+    testAnnotationProcessor "org.projectlombok:lombok:$lombokVersion"
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.security:spring-security-test'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
+    testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
+    testImplementation 'org.junit.platform:junit-platform-launcher:1.8.2'
+    testImplementation 'org.junit.platform:junit-platform-suite:1.8.2'
+    testImplementation "io.cucumber:cucumber-java:$cucumberVersion"
+    testImplementation "io.cucumber:cucumber-spring:$cucumberVersion"
+    testImplementation "io.cucumber:cucumber-junit:$cucumberVersion"
+    testImplementation "io.cucumber:cucumber-junit-platform-engine:$cucumberVersion"
+
+}
+
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
+

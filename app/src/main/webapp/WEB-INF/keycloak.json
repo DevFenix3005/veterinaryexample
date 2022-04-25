@@ -1,0 +1,12 @@
+{
+  "realm": "VetApp2",
+  "auth-server-url": "http://localhost:8081/auth/",
+  "ssl-required": "external",
+  "resource": "springbootapplication",
+  "verify-token-audience": true,
+  "credentials": {
+    "secret": "ojd75dxOxTS2bnBg9S6wbdeiSrN5Sjma"
+  },
+  "use-resource-role-mappings": true,
+  "confidential-port": 0
+}

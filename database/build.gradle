@@ -1,0 +1,35 @@
+plugins {
+    id 'org.liquibase.gradle'
+    id 'java'
+}
+
+dependencies {
+    liquibaseRuntime "org.liquibase:liquibase-core:$liquibaseVersion"
+    // https://mvnrepository.com/artifact/org.postgresql/postgresql
+    liquibaseRuntime 'org.postgresql:postgresql:42.3.3'
+    // https://mvnrepository.com/artifact/info.picocli/picocli
+    liquibaseRuntime 'info.picocli:picocli:4.6.3'
+
+    liquibaseRuntime "javax.xml.bind:jaxb-api:2.3.1"
+    liquibaseRuntime "ch.qos.logback:logback-core:1.2.3"
+    liquibaseRuntime "ch.qos.logback:logback-classic:1.2.3"
+}
+
+liquibase {
+    activities {
+        main {
+            changeLogFile 'src/main/db/changelog.xml'
+            url project.ext.mainUrl
+            username project.ext.mainUsername
+            password project.ext.mainPassword
+        }
+        diffMain {
+            changeLogFile 'changedir/changelog.xml'
+            url project.ext.mainUrl
+            username project.ext.mainUsername
+            password project.ext.mainPassword
+            difftypes 'data'
+        }
+    }
+    runList = "main"
+}

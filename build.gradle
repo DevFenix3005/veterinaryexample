@@ -1,0 +1,36 @@
+plugins {
+    id 'org.springframework.boot' version '2.6.4' apply false
+    id 'io.spring.dependency-management' version '1.0.11.RELEASE' apply false
+    id 'org.liquibase.gradle' version '2.1.0' apply false
+    id 'java'
+}
+
+allprojects {
+    group = 'com.rebirth.veterinaryexample'
+    version = '0.0.1-SNAPSHOT'
+    sourceCompatibility = '1.8'
+    repositories {
+        mavenCentral()
+    }
+
+    ext {
+        guavaVersion = '31.1-jre'
+        lombokVersion = '1.18.24'
+        liquibaseVersion = '4.4.3'
+        mapstructVerion = '1.4.2.Final'
+        vladVersion = '2.16.1'
+        jetbrainsVersion = '23.0.0'
+        keycloakVersion = '18.0.0'
+        problemZalandoVersion = '0.28.0-RC.0'
+        unirestVerion = '3.13.8'
+        cucumberVersion = '7.3.2'
+
+        mainUrl = "jdbc:postgresql://localhost:15432/veterinary"
+        mainUsername = "veterinaryuser"
+        mainPassword = "1234"
+
+        runList = "main"
+    }
+
+
+}

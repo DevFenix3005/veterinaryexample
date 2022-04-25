@@ -1,0 +1,68 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+    <changeSet author="Roberto D. Cazarin" id="breed_20220317_0000">
+        <createTable tableName="breeds" schemaName="${schemaApp}">
+
+            <column autoIncrement="true" name="breed_id" type="BIGINT">
+                <constraints primaryKey="true"/>
+            </column>
+
+            <column name="breed_uuid" type="UUID" defaultValueComputed="uuid_generate_v4()">
+                <constraints nullable="false" unique="true"/>
+            </column>
+
+            <column name="breed_name" type="VARCHAR(40)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="breed_size" type="BreedSize" defaultValueComputed="'Medium'::BreedSize">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="breed_description" type="TEXT">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="active" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="create_at" type="DATETIME" defaultValueComputed="current_timestamp">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="update_at" type="DATETIME" defaultValueComputed="current_timestamp">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="version" type="BIGINT" defaultValueNumeric="1">
+                <constraints nullable="false"/>
+            </column>
+
+        </createTable>
+    </changeSet>
+
+
+    <changeSet author="Roberto D. Cazarin" id="breed_20220325_0001">
+        <addColumn tableName="breeds" schemaName="${schemaApp}">
+            <column name="create_by" type="character varying">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+        <addForeignKeyConstraint baseTableSchemaName="${schemaApp}"
+                                 baseTableName="breeds"
+                                 baseColumnNames="create_by"
+                                 constraintName="create_by_fk"
+                                 referencedTableSchemaName="keycloak"
+                                 referencedTableName="user_entity"
+                                 referencedColumnNames="id"
+        />
+        <createIndex tableName="breeds" indexName="create_indx" schemaName="${schemaApp}">
+            <column name="create_by"/>
+        </createIndex>
+    </changeSet>
+
+
+</databaseChangeLog>

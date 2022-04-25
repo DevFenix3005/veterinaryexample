@@ -1,0 +1,142 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+    <changeSet author="Roberto D. Cazarin" id="pet_20220317_0000">
+        <createTable tableName="pets" schemaName="${schemaApp}">
+
+            <column autoIncrement="true" name="pet_id" type="BIGINT">
+                <constraints primaryKey="true"/>
+            </column>
+
+            <column name="pet_uuid" type="UUID" defaultValueComputed="uuid_generate_v4()">
+                <constraints nullable="false" unique="true"/>
+            </column>
+
+            <column name="pet_name" type="VARCHAR(40)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="gender" type="PetGender" defaultValueComputed="'Male'::PetGender">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="breed_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="owner_id" type="varchar(100)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="active" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="create_at" type="DATETIME" defaultValueComputed="current_timestamp">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="update_at" type="DATETIME" defaultValueComputed="current_timestamp">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="version" type="BIGINT" defaultValueNumeric="1">
+                <constraints nullable="false"/>
+            </column>
+
+        </createTable>
+    </changeSet>
+
+    <changeSet author="Roberto D. Cazarin" id="pet_20220317_0001">
+        <addForeignKeyConstraint baseTableSchemaName="${schemaApp}"
+                                 baseTableName="pets"
+                                 baseColumnNames="breed_id"
+                                 constraintName="breed_fk"
+                                 referencedTableSchemaName="${schemaApp}"
+                                 referencedTableName="breeds"
+                                 referencedColumnNames="breed_id"/>
+
+        <createIndex tableName="pets" indexName="owner_indx" schemaName="${schemaApp}">
+            <column name="owner_id"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet author="Roberto D. Cazarin" id="pet_20220317_0002">
+        <addColumn tableName="pets" schemaName="${schemaApp}">
+            <column name="pet_pic" type="${blobType}">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="Roberto D. Cazarin" id="pet_20220320_0001">
+        <dropColumn tableName="pets" schemaName="${schemaApp}" columnName="pet_pic"/>
+        <addColumn tableName="pets" schemaName="${schemaApp}">
+            <column name="url_pic" type="character varying">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="Roberto D. Cazarin" id="pet_20220323_0001">
+        <dropColumn tableName="pets" schemaName="${schemaApp}" columnName="url_pic"/>
+        <addColumn tableName="pets" schemaName="${schemaApp}">
+            <column name="pet_document" type="character varying" defaultValue="????????????">
+                <constraints nullable="false"/>
+            </column>
+            <column name="pet_pic" type="character varying">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="Roberto D. Cazarin" id="pet_20220325_0001">
+        <addColumn tableName="pets" schemaName="${schemaApp}">
+
+            <column name="birthday" type="DATE" defaultValueComputed="now()">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="primary_color" type="varchar(20)" defaultValue="negro">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="secundary_color" type="varchar(20)">
+                <constraints nullable="true"/>
+            </column>
+
+            <column type="PetStatus" name="status" defaultValueComputed="'OK'::PetStatus">
+                <constraints nullable="false"/>
+            </column>
+
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="Roberto D. Cazarin" id="pet_20220325_0002">
+        <dropColumn tableName="pets" schemaName="${schemaApp}" columnName="owner_id"/>
+        <addColumn tableName="pets" schemaName="${schemaApp}">
+            <column type="character varying(36)" name="owner_id">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+        <addForeignKeyConstraint baseTableSchemaName="${schemaApp}"
+                                 baseTableName="pets"
+                                 baseColumnNames="owner_id"
+                                 constraintName="owner_id_fk"
+                                 referencedTableSchemaName="keycloak"
+                                 referencedTableName="user_entity"
+                                 referencedColumnNames="id"
+        />
+
+    </changeSet>
+
+    <changeSet author="Roberto D. Cazarin" id="pet_20220325_0003">
+        <comment>Add index to this owner to performace the queries</comment>
+        <createIndex tableName="pets" indexName="owner_idx" schemaName="${schemaApp}">
+            <column name="owner_id"/>
+        </createIndex>
+    </changeSet>
+
+
+</databaseChangeLog>

@@ -1,0 +1,4 @@
+rootProject.name = 'veterinaryexample'
+include 'app'
+include 'database'
+
