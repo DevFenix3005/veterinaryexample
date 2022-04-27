@@ -15,9 +15,11 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.ExpressionUrlAuthorizationConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.authority.mapping.SimpleAuthorityMapper;
 import org.springframework.security.core.session.SessionRegistry;
@@ -51,13 +53,21 @@ public class WebSecurityConfiguration extends KeycloakWebSecurityConfigurerAdapt
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
-                .authorizeRequests()
+                .authorizeRequests(this::authorizeRequests);
+    }
+
+    private void authorizeRequests(ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry expressionInterceptUrlRegistry) {
+        expressionInterceptUrlRegistry
+                // ALL ROLES
                 .antMatchers(HttpMethod.OPTIONS).permitAll()
-                .antMatchers(HttpMethod.GET, WebResourceConstants.API_PET + "/*/pic").permitAll()
-                .antMatchers(WebResourceConstants.API_USER + "/**").hasAnyRole(Constants.ADMIN_ROLE)
-                .antMatchers(WebResourceConstants.API_PET + "/**").hasAnyRole(Constants.ALL_ROLES)
-                .antMatchers(WebResourceConstants.API_BREED + "/**").hasAnyRole(Constants.ALL_ROLES)
-                .antMatchers(WebResourceConstants.API_PETDETAIL + "/**").hasAnyRole(Constants.ALL_ROLES)
+                .antMatchers(WebResourceConstants.API_PET + "/**").hasAnyRole(ConfigurationConstants.ALL_ROLES)
+                .antMatchers(HttpMethod.GET,WebResourceConstants.API_BREED + "/**").hasAnyRole(ConfigurationConstants.ALL_ROLES)
+                .antMatchers(HttpMethod.GET,WebResourceConstants.API_PETDETAIL + "/**").hasAnyRole(ConfigurationConstants.ALL_ROLES)
+                // ADMIN AND VET ROLES
+                .antMatchers(HttpMethod.POST,WebResourceConstants.API_BREED + "/**").hasAnyRole(ConfigurationConstants.ADMINISTRATIVE_ROLES)
+                .antMatchers(HttpMethod.PUT,WebResourceConstants.API_BREED + "/**").hasAnyRole(ConfigurationConstants.ADMINISTRATIVE_ROLES)
+                .antMatchers(HttpMethod.DELETE,WebResourceConstants.API_BREED + "/**").hasAnyRole(ConfigurationConstants.ADMINISTRATIVE_ROLES)
+                .antMatchers(HttpMethod.POST,WebResourceConstants.API_PETDETAIL + "/**").hasAnyRole(ConfigurationConstants.ADMINISTRATIVE_ROLES)
                 .anyRequest()
                 .permitAll();
     }
