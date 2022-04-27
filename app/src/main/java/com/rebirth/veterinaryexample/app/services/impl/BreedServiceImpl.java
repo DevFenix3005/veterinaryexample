@@ -9,6 +9,10 @@ import com.rebirth.veterinaryexample.app.services.dtos.breeds.BreedUpdate;
 import com.rebirth.veterinaryexample.app.services.mappers.BreedDtoMapper;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -24,12 +28,14 @@ public class BreedServiceImpl implements BreedService {
     private final BreedDtoMapper breedDtoMapper;
 
     @Override
+    @Cacheable(value = "breeds", key = "#uuid.toString()")
     public Optional<BreedDto> read(UUID uuid) {
         return breedRepository.findByUuid(uuid)
                 .map(this.breedDtoMapper::breedToBreedDto);
     }
 
     @Override
+    @Cacheable(value = "listOfbreeds")
     public List<BreedDto> readAll() {
         return this.breedRepository.findAll()
                 .stream()
@@ -38,12 +44,16 @@ public class BreedServiceImpl implements BreedService {
     }
 
     @Override
+    @CacheEvict(value = "listOfbreeds", allEntries = true)
     public BreedDto create(BreedCreate breedCreate) {
         Breed newBreed = this.breedDtoMapper.breedCreateToBreed(breedCreate);
         newBreed = this.breedRepository.save(newBreed);
         return this.breedDtoMapper.breedToBreedDto(newBreed);
     }
 
+    @Caching(evict = @CacheEvict(value = "listOfbreeds", allEntries = true),
+            put = @CachePut(value = "breeds", key = "#uuid.toString()")
+    )
     @Override
     public Optional<BreedDto> update(UUID uuid, BreedUpdate breedUpdate) {
         return breedRepository.findByUuid(uuid)
@@ -54,6 +64,10 @@ public class BreedServiceImpl implements BreedService {
                 });
     }
 
+    @Caching(evict = {
+            @CacheEvict(value = "listOfbreeds", allEntries = true),
+            @CacheEvict(value = "breeds", key = "#uuid.toString()"),
+    })
     @Override
     public void delete(UUID uuid) {
         breedRepository.findByUuid(uuid)

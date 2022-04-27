@@ -10,46 +10,41 @@ import com.rebirth.veterinaryexample.app.services.dtos.teedy.DocumentCreate;
 import com.rebirth.veterinaryexample.app.services.dtos.teedy.FileCreate;
 import com.rebirth.veterinaryexample.app.services.dtos.teedy.RawAndMeta;
 import com.rebirth.veterinaryexample.app.services.mappers.PetMapper;
+import com.rebirth.veterinaryexample.app.utils.ServiceUtilComponent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.representations.AccessToken;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Slf4j
-@Transactional
 @Service
+@Transactional
 @RequiredArgsConstructor(onConstructor_ = {@Autowired})
 public class PetServiceImpl implements PetService {
 
     private final PetRepository petRepository;
     private final PetMapper petMapper;
     private final TeedyService teedyService;
+    private final ServiceUtilComponent serviceUtilComponent;
 
-    @Value("${keycloak.resource}")
-    private String resource;
-
-    @Override
-    public PetBase.PetDto create(PetBase.PetCreate petCreate) {
-        Pet newPet = this.petMapper.petCreate2Pet(petCreate);
-        DocumentCreate documentCreate = teedyService.createDocument(newPet);
-        newPet.setPetDocument(documentCreate.getId());
-        newPet = this.petRepository.save(newPet);
-        return this.petMapper.pet2PetDto(newPet);
-    }
+    private final CacheManager cacheManager;
 
     @Override
-    public PetBase.PetDto create(PetBase.PetCreate petCreate, MultipartFile petPic) {
-
+    @CacheEvict(value = "listOfPets", allEntries = true)
+    public PetBase.PetDto create(PetBase.PetCreate petCreate, MultipartFile petPic, AccessToken accessToken) {
         Pet newPet = this.petMapper.petCreate2Pet(petCreate);
         DocumentCreate documentCreate = teedyService.createDocument(newPet);
         newPet.setPetDocument(documentCreate.getId());
@@ -62,40 +57,44 @@ public class PetServiceImpl implements PetService {
         }
 
         newPet = this.petRepository.save(newPet);
+        var cache = cacheManager.getCache("pets");
+        if (cache != null) {
+            cache.put(newPet.getUuid().toString(), newPet);
+        }
         return this.petMapper.pet2PetDto(newPet);
     }
 
     @Override
     public RawAndMeta getImageFromTeedy(UUID petUUID, String size) {
         Optional<String> optionalPet = this.petRepository.findPetPicUUIDByUuid(petUUID);
-        return optionalPet.map((uuid)-> this.teedyService.getImage(uuid, size))
+        return optionalPet.map((uuid) -> this.teedyService.getImage(uuid, size))
                 .orElseThrow(() -> new PetNotFoundEx(petUUID));
     }
 
     @Override
-    public Optional<PetBase.PetDto> read(UUID uuid) {
-        return this.petRepository.findByUuid(uuid)
-                .map(this.petMapper::pet2PetDto);
+    @Cacheable(value = "pets", key = "#uuid.toString()")
+    public Optional<PetBase.PetDto> read(UUID uuid, AccessToken accessToken) {
+        if (this.serviceUtilComponent.areYouAnAdmin(accessToken)) {
+            return this.petRepository.findByUuid(uuid)
+                    .map(this.petMapper::pet2PetDto);
+        } else {
+            var ownerUUID = this.serviceUtilComponent.accessTokenAsSubjectUUID(accessToken);
+            return this.petRepository.findByUuid(uuid, ownerUUID)
+                    .map(this.petMapper::pet2PetDto);
+        }
     }
 
     @Override
-    public List<PetBase.PetDto> readAll() {
-        throw new UnsupportedOperationException("No implementes this");
-    }
-
-    @Override
-    public List<PetBase.PetDto> readAll(AccessToken token) {
-        AccessToken.Access res = token.getResourceAccess().get(resource);
-        Set<String> roles = res.getRoles();
-        log.info("Roles asignados: {}", roles);
-        if (roles.contains("Admin")) {
+    @Cacheable(value = "listOfPets", key = "#accessToken.getSubject()")
+    public List<PetBase.PetDto> readAll(AccessToken accessToken) {
+        if (this.serviceUtilComponent.areYouAnAdmin(accessToken)) {
             return this.petRepository.findAll()
                     .stream()
                     .map(this.petMapper::pet2PetDto)
                     .collect(Collectors.toList());
         } else {
-            String subject = token.getSubject();
-            return this.petRepository.findAllbyOwnerUUID(subject)
+            var ownerUUID = this.serviceUtilComponent.accessTokenAsSubjectUUID(accessToken);
+            return this.petRepository.findAll(ownerUUID)
                     .stream()
                     .map(this.petMapper::pet2PetDto)
                     .collect(Collectors.toList());
@@ -103,18 +102,46 @@ public class PetServiceImpl implements PetService {
     }
 
     @Override
-    public Optional<PetBase.PetDto> update(UUID uuid, PetBase.PetUpdate petUpdate) {
-        return this.petRepository.findByUuid(uuid)
-                .map(pet -> {
-                    this.petMapper.petUpdatePassValues2Pet(pet, petUpdate);
-                    Pet updatePet = this.petRepository.save(pet);
-                    return this.petMapper.pet2PetDto(updatePet);
-                });
+    @Caching(
+            evict = @CacheEvict(value = "listOfPets", key = "#accessToken.getSubject()"),
+            put = @CachePut(value = "pets", key = "#uuid.toString()")
+    )
+    public Optional<PetBase.PetDto> update(UUID uuid, PetBase.PetUpdate petUpdate, AccessToken accessToken) {
+        if (this.serviceUtilComponent.areYouAnAdmin(accessToken)) {
+            return this.petRepository.findByUuid(uuid)
+                    .map(pet -> {
+                        this.petMapper.petUpdatePassValues2Pet(pet, petUpdate);
+                        Pet updatePet = this.petRepository.save(pet);
+                        return this.petMapper.pet2PetDto(updatePet);
+                    });
+        } else {
+            var ownerUUID = this.serviceUtilComponent.accessTokenAsSubjectUUID(accessToken);
+            return this.petRepository.findByUuid(uuid, ownerUUID)
+                    .map(pet -> {
+                        this.petMapper.petUpdatePassValues2Pet(pet, petUpdate);
+                        Pet updatePet = this.petRepository.save(pet);
+                        return this.petMapper.pet2PetDto(updatePet);
+                    });
+        }
     }
 
     @Override
-    public void delete(UUID uuid) {
-        this.petRepository.findByUuid(uuid)
-                .ifPresent(this.petRepository::delete);
+    @Caching(
+            evict = {
+                    @CacheEvict(value = "pets", key = "#uuid.toString()"),
+                    @CacheEvict(value = "listOfPets", key = "#accessToken.getSubject()")
+            }
+    )
+    public void delete(UUID uuid, AccessToken accessToken) {
+        if (this.serviceUtilComponent.areYouAnAdmin(accessToken)) {
+            this.petRepository.findByUuid(uuid)
+                    .ifPresent(this.petRepository::delete);
+        } else {
+            var ownerUUID = this.serviceUtilComponent.accessTokenAsSubjectUUID(accessToken);
+            this.petRepository.findByUuid(uuid, ownerUUID)
+                    .ifPresent(this.petRepository::delete);
+        }
     }
+
+
 }
