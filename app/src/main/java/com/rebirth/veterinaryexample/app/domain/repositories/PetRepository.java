@@ -14,11 +14,22 @@ public interface PetRepository extends JpaRepository<Pet, Long> {
     @Query("SELECT p0 FROM Pet p0 INNER JOIN FETCH p0.breed b0 WHERE p0.uuid = :uuid")
     Optional<Pet> findByUuid(UUID uuid);
 
+    @Query("""
+            SELECT p0
+            FROM Pet p0 INNER JOIN FETCH p0.breed b0
+            WHERE p0.uuid = :petUUID and p0.ownerId = :ownerId
+            """)
+    Optional<Pet> findByUuid(@Param("petUUID") UUID uuid, @Param("ownerId") String ownerId);
+
     @Query("SELECT p0.petPic FROM Pet p0 WHERE p0.uuid = :uuid")
     Optional<String> findPetPicUUIDByUuid(@Param("uuid") UUID uuid);
 
-    @Query("SELECT p0 FROM Pet p0 INNER JOIN FETCH p0.breed b0 WHERE p0.ownerId = :ownerId")
-    List<Pet> findAllbyOwnerUUID(@Param("ownerId") String ownerId);
+    @Query("""
+            SELECT p0
+            FROM Pet p0 INNER JOIN FETCH p0.breed b0
+            WHERE p0.ownerId = :ownerId
+            """)
+    List<Pet> findAll(@Param("ownerId") String ownerId);
 
     @Query("SELECT p0 FROM Pet p0 INNER JOIN FETCH p0.breed b0")
     List<Pet> findAll();
