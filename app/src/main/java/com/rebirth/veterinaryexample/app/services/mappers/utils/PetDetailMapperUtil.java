@@ -24,8 +24,4 @@ public class PetDetailMapperUtil {
         else return currentPet;
     }
 
-    public String solveUrl(Pet pet) {
-        return "http://localhost:8080/vetapp/api/v00/pethelper/" + pet.getUuid() + "/pic";
-    }
-
 }

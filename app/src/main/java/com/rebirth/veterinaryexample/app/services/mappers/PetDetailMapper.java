@@ -27,7 +27,6 @@ public interface PetDetailMapper {
     @Mapping(target = "createBy", ignore = true)
     void petDetailUpdatePassValues2PetDetail(@MappingTarget PetDetail petDetail, PetDetailBase.PetDetailUpdate petDetailUpdate);
 
-    @Mapping(target = "picUrl", source = "pet")
     @Mapping(target = "petUuid", source = "pet.uuid")
     @Mapping(target = "createAt", source = "createAt")
     PetDetailBase.PetDetailDto petDetail2PetilDetailDto(PetDetail petDetail);
