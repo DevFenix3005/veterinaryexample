@@ -5,7 +5,9 @@ import com.rebirth.veterinaryexample.app.services.dtos.pets.PetBase;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import org.assertj.core.util.Maps;
 import org.junit.jupiter.api.Assertions;
+import org.keycloak.representations.AccessToken;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.UUID;
@@ -19,21 +21,27 @@ public class PetStepdefs {
     private String currentDogName;
     private String currentDogBreed;
 
+    private AccessToken accessToken;
+
     @Given("The identifier of the dog that is {string}")
     public void theIdentifierOfTheDogThatIs(String uuid) {
         this.currentDogUUID = UUID.fromString(uuid);
+        AccessToken.Access access = new AccessToken.Access().addRole("Member");
+        this.accessToken = new AccessToken();
+        this.accessToken.setSubject("086016ed-038e-4526-8d22-9787f88b713e");
+        this.accessToken.setResourceAccess(Maps.newHashMap("springbootapplication", access));
     }
 
     @When("I check with the PetService")
     public void iCheckWithThePetService() {
-        currentDogName = petService.read(currentDogUUID)
+        currentDogName = petService.read(currentDogUUID, this.accessToken)
                 .map(PetBase::getName)
                 .orElseThrow(() -> new RuntimeException("Haskell not found"));
     }
 
     @When("I check the breed with the PetService")
     public void iCheckTheBreedWithThePetService() {
-        currentDogBreed = petService.read(this.currentDogUUID)
+        currentDogBreed = petService.read(this.currentDogUUID, this.accessToken)
                 .map(PetBase.PetDto::getBreed)
                 .orElseThrow(() -> new RuntimeException("Haskell not found"));
     }
