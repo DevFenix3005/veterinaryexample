@@ -23,7 +23,6 @@ public class DatabaseConfiguration {
             KeycloakPrincipal keycloakPrincipal = (KeycloakPrincipal) auth.getPrincipal();
             AccessToken token = keycloakPrincipal.getKeycloakSecurityContext().getToken();
             String subject = token.getSubject();
-            System.out.println(subject);
             return Optional.of(subject);
         };
     }

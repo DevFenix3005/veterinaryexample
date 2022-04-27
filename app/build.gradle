@@ -4,28 +4,39 @@ plugins {
     id 'java'
 }
 
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
 dependencies {
-    implementation platform("org.keycloak.bom:keycloak-adapter-bom:$keycloakVersion")
-
-    compileOnly "org.projectlombok:lombok:$lombokVersion"
-    runtimeOnly 'org.postgresql:postgresql'
-
-    annotationProcessor "org.mapstruct:mapstruct-processor:$mapstructVerion"
-    annotationProcessor "org.projectlombok:lombok:$lombokVersion"
-    annotationProcessor "org.projectlombok:lombok-mapstruct-binding:0.2.0"
-
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-cache'
+
+    implementation platform("org.keycloak.bom:keycloak-adapter-bom:$keycloakVersion")
     implementation 'org.keycloak:keycloak-spring-boot-starter'
+
+    runtimeOnly 'org.postgresql:postgresql'
+
+    implementation "org.mapstruct:mapstruct:$mapstructVerion"
+    annotationProcessor "org.mapstruct:mapstruct-processor:$mapstructVerion"
+
+    compileOnly "org.projectlombok:lombok:$lombokVersion"
+    annotationProcessor "org.projectlombok:lombok:$lombokVersion"
+    annotationProcessor "org.projectlombok:lombok-mapstruct-binding:0.2.0"
+
     implementation "org.zalando:problem-spring-web-starter:$problemZalandoVersion"
     implementation "com.google.guava:guava:$guavaVersion"
-    implementation "org.mapstruct:mapstruct:$mapstructVerion"
     implementation "com.vladmihalcea:hibernate-types-55:$vladVersion"
     implementation "org.jetbrains:annotations:$jetbrainsVersion"
     implementation "com.konghq:unirest-java:$unirestVerion"
     implementation "com.konghq:unirest-objectmapper-jackson:$unirestVerion"
+    implementation "com.github.ben-manes.caffeine:caffeine:$caffeineVersion"
 
     testCompileOnly "org.projectlombok:lombok:$lombokVersion"
 
