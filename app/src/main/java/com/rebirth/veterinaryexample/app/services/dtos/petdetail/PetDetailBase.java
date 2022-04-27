@@ -77,7 +77,6 @@ public class PetDetailBase implements Serializable {
     @EqualsAndHashCode(callSuper = true)
     @Data
     public static final class PetDetailDto extends PetDetailBase {
-        private String picUrl;
         private UUID petUuid;
         @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
         private LocalDateTime createAt;
