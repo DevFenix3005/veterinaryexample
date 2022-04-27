@@ -8,6 +8,7 @@ import com.rebirth.veterinaryexample.app.services.dtos.teedy.RawAndMeta;
 import com.rebirth.veterinaryexample.app.web.resources.BaseResource;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
+import org.keycloak.representations.AccessToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -41,8 +42,8 @@ public class PetController extends BaseResource {
         if (bindingResult.hasErrors()) {
             throw new PetCreateEx(bindingResult.getFieldErrors());
         } else {
-            //PetBase.PetCreate petCreateRequest = objectMapper.readValue(body, PetBase.PetCreate.class);
-            PetBase.PetDto newPetDto = this.petService.create(petCreateRequest, file);
+            AccessToken accessToken = this.getAccessToken();
+            PetBase.PetDto newPetDto = this.petService.create(petCreateRequest, file, accessToken);
             URI breedUri = this.generateUri(newPetDto.getUuid());
             return ResponseEntity.created(breedUri).body(newPetDto);
         }
