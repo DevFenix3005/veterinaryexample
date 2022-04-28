@@ -11,6 +11,7 @@ import kong.unirest.UnirestInstance;
 import kong.unirest.jackson.JacksonObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
@@ -22,7 +23,7 @@ import javax.annotation.PreDestroy;
 import java.io.IOException;
 import java.io.InputStream;
 
-@Log4j2
+@Slf4j
 @Service
 @RequiredArgsConstructor(onConstructor_ = {@Autowired})
 public class TeedyServiceImpl implements TeedyService {
@@ -46,6 +47,7 @@ public class TeedyServiceImpl implements TeedyService {
     @PostConstruct
     @Override
     public void initTeedy() {
+        log.info(this.host);
         unirestInstance.config()
                 .defaultBaseUrl(host)
                 .setObjectMapper(new JacksonObjectMapper(objectMapper));
