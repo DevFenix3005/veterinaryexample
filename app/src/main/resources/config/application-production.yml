@@ -1,0 +1,25 @@
+spring:
+  jpa:
+    show-sql: true
+    properties.hibernate.format_sql: true
+  main:
+    allow-bean-definition-overriding: true
+  datasource:
+    url: jdbc:postgresql://localhost:15432/veterinary
+    username: veterinaryuser
+    password: 1234
+keycloak:
+  realm: VetApp2
+  auth-server-url: http://localhost:8081/auth/
+  ssl-required: external
+  resource: springbootapplication
+  credentials:
+    secret: ojd75dxOxTS2bnBg9S6wbdeiSrN5Sjma
+  use-resource-role-mappings: true
+  confidential-port: 0
+teedy:
+  host: http://localhost:8082
+  username: vetapp
+  password: H4sk3ll%%8080
+  codettop: foo
+
