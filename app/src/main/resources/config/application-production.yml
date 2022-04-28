@@ -1,16 +1,19 @@
+server:
+  port: 8080
 spring:
   jpa:
-    show-sql: true
-    properties.hibernate.format_sql: true
+    show-sql: false
+    properties.hibernate.format_sql: false
   main:
     allow-bean-definition-overriding: true
   datasource:
-    url: jdbc:postgresql://localhost:15432/veterinary
+    url: jdbc:postgresql://db:5432/veterinary
     username: veterinaryuser
     password: 1234
 keycloak:
   realm: VetApp2
-  auth-server-url: http://localhost:8081/auth/
+  proxy-url: http://keycloak:8080/auth/
+  auth-server-url: http://localhost:8081/auth
   ssl-required: external
   resource: springbootapplication
   credentials:
@@ -18,7 +21,7 @@ keycloak:
   use-resource-role-mappings: true
   confidential-port: 0
 teedy:
-  host: http://localhost:8082
+  host: http://teedy:8080
   username: vetapp
   password: H4sk3ll%%8080
   codettop: foo
